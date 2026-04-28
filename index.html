@@ -1,0 +1,836 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Administrasi Kantor - Modern Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <script>
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['Inter', 'sans-serif'],
+            },
+            colors: {
+              primary: {
+                50: '#eff6ff',
+                100: '#dbeafe',
+                500: '#3b82f6',
+                600: '#2563eb',
+                700: '#1d4ed8',
+              }
+            }
+          }
+        }
+      }
+    </script>
+    <style>
+      * {
+        font-family: 'Inter', sans-serif;
+      }
+      .fade-in {
+        animation: fadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+      @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+      .slide-in {
+        animation: slideIn 0.3s ease-out;
+      }
+      @keyframes slideIn {
+        from { transform: translateX(-100%); }
+        to { transform: translateX(0); }
+      }
+      .scale-in {
+        animation: scaleIn 0.2s ease-out;
+      }
+      @keyframes scaleIn {
+        from { opacity: 0; transform: scale(0.95); }
+        to { opacity: 1; transform: scale(1); }
+      }
+      .glass-effect {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+      }
+      .dark .glass-effect {
+        background: rgba(17, 24, 39, 0.95);
+      }
+      .card-hover {
+        transition: all 0.3s ease;
+      }
+      .card-hover:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+      }
+      .status-badge {
+        padding: 6px 12px;
+        border-radius: 9999px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+      }
+      .status-badge::before {
+        content: '';
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: currentColor;
+      }
+      .sidebar-link {
+        position: relative;
+        transition: all 0.2s;
+      }
+      .sidebar-link::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 0;
+        height: 70%;
+        background: #3b82f6;
+        border-radius: 0 4px 4px 0;
+        transition: width 0.2s;
+      }
+      .sidebar-link:hover::before,
+      .sidebar-link.active::before {
+        width: 4px;
+      }
+      @media (max-width: 768px) {
+        .mobile-sidebar {
+          transform: translateX(-100%);
+          transition: transform 0.3s ease-in-out;
+        }
+        .mobile-sidebar.open {
+          transform: translateX(0);
+        }
+      }
+    </style>
+  </head>
+  <body class="bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-200 transition-colors duration-300">
+    
+    <!-- Mobile Header -->
+    <header class="lg:hidden fixed top-0 left-0 right-0 bg-white dark:bg-gray-800 shadow-md z-40 px-4 py-3 flex justify-between items-center">
+      <button onclick="toggleMobileSidebar()" class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition">
+        <i class="fa-solid fa-bars text-xl"></i>
+      </button>
+      <div class="flex items-center gap-2 font-bold text-lg">
+        <i class="fa-solid fa-briefcase text-blue-500"></i>
+        <span>AdminKantor</span>
+      </div>
+      <button onclick="toggleDarkMode()" class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition">
+        <i class="fa-solid fa-moon dark:hidden"></i>
+        <i class="fa-solid fa-sun hidden dark:block text-yellow-400"></i>
+      </button>
+    </header>
+
+    <!-- Sidebar -->
+    <aside id="sidebar" class="mobile-sidebar fixed lg:sticky inset-y-0 left-0 w-72 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 p-6 flex flex-col shadow-xl lg:shadow-none z-50 h-screen">
+      <div class="flex items-center justify-between mb-10">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center text-white font-bold text-lg shadow-lg">
+            <i class="fa-solid fa-briefcase"></i>
+          </div>
+          <div>
+            <h1 class="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">AdminKantor</h1>
+            <p class="text-xs text-gray-500 dark:text-gray-400">Office Management</p>
+          </div>
+        </div>
+        <button onclick="toggleMobileSidebar()" class="lg:hidden p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700">
+          <i class="fa-solid fa-times"></i>
+        </button>
+      </div>
+
+      <nav class="flex-1 space-y-2">
+        <button onclick="showPage('dashboard')" class="sidebar-link w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition group active" id="btn-dashboard">
+          <div class="w-10 h-10 rounded-lg bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 flex items-center justify-center group-hover:scale-110 transition">
+            <i class="fa-solid fa-chart-line"></i>
+          </div>
+          <span class="font-medium">Dashboard</span>
+        </button>
+        
+        <button onclick="showPage('masuk')" class="sidebar-link w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition group" id="btn-masuk">
+          <div class="w-10 h-10 rounded-lg bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 flex items-center justify-center group-hover:scale-110 transition">
+            <i class="fa-solid fa-inbox"></i>
+          </div>
+          <span class="font-medium">Surat Masuk</span>
+          <span id="badge-masuk" class="ml-auto bg-green-500 text-white text-xs font-bold px-2 py-1 rounded-full">0</span>
+        </button>
+        
+        <button onclick="showPage('keluar')" class="sidebar-link w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition group" id="btn-keluar">
+          <div class="w-10 h-10 rounded-lg bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 flex items-center justify-center group-hover:scale-110 transition">
+            <i class="fa-solid fa-paper-plane"></i>
+          </div>
+          <span class="font-medium">Surat Keluar</span>
+          <span id="badge-keluar" class="ml-auto bg-purple-500 text-white text-xs font-bold px-2 py-1 rounded-full">0</span>
+        </button>
+        
+        <button onclick="showPage('reimburse')" class="sidebar-link w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition group" id="btn-reimburse">
+          <div class="w-10 h-10 rounded-lg bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 flex items-center justify-center group-hover:scale-110 transition">
+            <i class="fa-solid fa-money-bill-wave"></i>
+          </div>
+          <span class="font-medium">Reimbursement</span>
+          <span id="badge-reimburse" class="ml-auto bg-yellow-500 text-white text-xs font-bold px-2 py-1 rounded-full">0</span>
+        </button>
+      </nav>
+
+      <div class="mt-auto pt-6 border-t border-gray-200 dark:border-gray-700 space-y-3">
+        <button onclick="toggleDarkMode()" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition">
+          <i class="fa-solid fa-moon dark:hidden text-gray-600"></i>
+          <i class="fa-solid fa-sun hidden dark:block text-yellow-400"></i>
+          <span class="font-medium">Dark Mode</span>
+        </button>
+        <button onclick="resetData()" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl bg-gradient-to-r from-red-500 to-pink-600 text-white hover:from-red-600 hover:to-pink-700 transition shadow-lg hover:shadow-xl">
+          <i class="fa-solid fa-rotate-left"></i>
+          <span class="font-medium">Reset Data Demo</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- Overlay for mobile -->
+    <div id="sidebar-overlay" onclick="toggleMobileSidebar()" class="fixed inset-0 bg-black/50 z-40 hidden lg:hidden backdrop-blur-sm"></div>
+
+    <!-- Main Content -->
+    <main class="lg:ml-72 p-4 lg:p-8 min-h-screen pt-20 lg:pt-8">
+      
+      <!-- Header -->
+      <header class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8 bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700">
+        <div>
+          <h1 class="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white" id="page-title">Dashboard</h1>
+          <p class="text-gray-500 dark:text-gray-400 mt-1" id="current-date"></p>
+        </div>
+        <div class="flex items-center gap-4">
+          <div class="text-right hidden sm:block">
+            <p class="text-sm font-semibold text-gray-900 dark:text-white">Admin Demo</p>
+            <p class="text-xs text-gray-500 dark:text-gray-400">Administrator</p>
+          </div>
+          <div class="w-12 h-12 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full flex items-center justify-center text-white font-bold text-lg shadow-lg">
+            A
+          </div>
+        </div>
+      </header>
+
+      <!-- Dashboard -->
+      <section id="page-dashboard" class="page-section fade-in">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 mb-8">
+          <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 card-hover">
+            <div class="flex items-center justify-between mb-4">
+              <div class="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-xl flex items-center justify-center text-blue-600 dark:text-blue-400">
+                <i class="fa-solid fa-inbox text-xl"></i>
+              </div>
+              <span class="text-xs font-semibold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 px-2 py-1 rounded-full">Total</span>
+            </div>
+            <p class="text-gray-500 dark:text-gray-400 text-sm font-medium">Surat Masuk</p>
+            <p class="text-3xl font-bold text-gray-900 dark:text-white mt-1" id="stat-masuk">0</p>
+          </div>
+
+          <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 card-hover">
+            <div class="flex items-center justify-between mb-4">
+              <div class="w-12 h-12 bg-purple-100 dark:bg-purple-900/30 rounded-xl flex items-center justify-center text-purple-600 dark:text-purple-400">
+                <i class="fa-solid fa-paper-plane text-xl"></i>
+              </div>
+              <span class="text-xs font-semibold text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-900/20 px-2 py-1 rounded-full">Total</span>
+            </div>
+            <p class="text-gray-500 dark:text-gray-400 text-sm font-medium">Surat Keluar</p>
+            <p class="text-3xl font-bold text-gray-900 dark:text-white mt-1" id="stat-keluar">0</p>
+          </div>
+
+          <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 card-hover">
+            <div class="flex items-center justify-between mb-4">
+              <div class="w-12 h-12 bg-yellow-100 dark:bg-yellow-900/30 rounded-xl flex items-center justify-center text-yellow-600 dark:text-yellow-400">
+                <i class="fa-solid fa-clock text-xl"></i>
+              </div>
+              <span class="text-xs font-semibold text-yellow-600 dark:text-yellow-400 bg-yellow-50 dark:bg-yellow-900/20 px-2 py-1 rounded-full">Pending</span>
+            </div>
+            <p class="text-gray-500 dark:text-gray-400 text-sm font-medium">Reimburse Pending</p>
+            <p class="text-3xl font-bold text-gray-900 dark:text-white mt-1" id="stat-reimburse-pending">0</p>
+          </div>
+
+          <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 card-hover">
+            <div class="flex items-center justify-between mb-4">
+              <div class="w-12 h-12 bg-emerald-100 dark:bg-emerald-900/30 rounded-xl flex items-center justify-center text-emerald-600 dark:text-emerald-400">
+                <i class="fa-solid fa-wallet text-xl"></i>
+              </div>
+              <span class="text-xs font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/20 px-2 py-1 rounded-full">Approved</span>
+            </div>
+            <p class="text-gray-500 dark:text-gray-400 text-sm font-medium">Total Nominal</p>
+            <p class="text-2xl font-bold text-gray-900 dark:text-white mt-1" id="stat-reimburse-nominal">Rp 0</p>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700">
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="font-bold text-lg text-gray-900 dark:text-white">Aktivitas Surat Terbaru</h3>
+              <span class="text-xs text-gray-500 dark:text-gray-400"><i class="fa-solid fa-clock mr-1"></i> Real-time</span>
+            </div>
+            <ul id="recent-logs-surat" class="space-y-3 text-sm"></ul>
+          </div>
+          
+          <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700">
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="font-bold text-lg text-gray-900 dark:text-white">Aktivitas Reimburse</h3>
+              <span class="text-xs text-gray-500 dark:text-gray-400"><i class="fa-solid fa-clock mr-1"></i> Real-time</span>
+            </div>
+            <ul id="recent-logs-reimburse" class="space-y-3 text-sm"></ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- Surat Masuk -->
+      <section id="page-masuk" class="page-section hidden fade-in">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+          <div class="relative w-full sm:w-96">
+            <i class="fa-solid fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+            <input type="text" id="search-masuk" placeholder="Cari nomor atau perihal..." class="w-full pl-12 pr-4 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition shadow-sm" />
+          </div>
+          <button onclick="openLetterModal('masuk')" class="w-full sm:w-auto bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-6 py-3 rounded-xl transition shadow-lg hover:shadow-xl flex items-center justify-center gap-2 font-medium">
+            <i class="fa-solid fa-plus"></i>
+            <span>Tambah Surat Masuk</span>
+          </button>
+        </div>
+        
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
+          <div class="overflow-x-auto">
+            <table class="w-full">
+              <thead class="bg-gray-50 dark:bg-gray-700/50 border-b border-gray-200 dark:border-gray-700">
+                <tr>
+                  <th class="p-4 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">No. Agenda</th>
+                  <th class="p-4 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Tanggal</th>
+                  <th class="p-4 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Perihal</th>
+                  <th class="p-4 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Pengirim</th>
+                  <th class="p-4 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Status</th>
+                  <th class="p-4 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Aksi</th>
+                </tr>
+              </thead>
+              <tbody id="table-masuk" class="divide-y divide-gray-200 dark:divide-gray-700"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- Surat Keluar -->
+      <section id="page-keluar" class="page-section hidden fade-in">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+          <div class="relative w-full sm:w-96">
+            <i class="fa-solid fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+            <input type="text" id="search-keluar" placeholder="Cari nomor atau perihal..." class="w-full pl-12 pr-4 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition shadow-sm" />
+          </div>
+          <button onclick="openLetterModal('keluar')" class="w-full sm:w-auto bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white px-6 py-3 rounded-xl transition shadow-lg hover:shadow-xl flex items-center justify-center gap-2 font-medium">
+            <i class="fa-solid fa-plus"></i>
+            <span>Buat Draft Keluar</span>
+          </button>
+        </div>
+        
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
+          <div class="overflow-x-auto">
+            <table class="w-full">
+              <thead class="bg-gray-50 dark:bg-gray-700/50 border-b border-gray-200 dark:border-gray-700">
+                <tr>
+                  <th class="p-4 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">No. Surat</th>
+                  <th class="p-4 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Tanggal</th>
+                  <th class="p-4 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Perihal</th>
+                  <th class="p-4 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Tujuan</th>
+                  <th class="p-4 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Status</th>
+                  <th class="p-4 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Aksi</th>
+                </tr>
+              </thead>
+              <tbody id="table-keluar" class="divide-y divide-gray-200 dark:divide-gray-700"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- Reimbursement -->
+      <section id="page-reimburse" class="page-section hidden fade-in">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+          <div class="relative w-full sm:w-96">
+            <i class="fa-solid fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+            <input type="text" id="search-reimburse" placeholder="Cari kategori atau keterangan..." class="w-full pl-12 pr-4 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none transition shadow-sm" />
+          </div>
+          <button onclick="openReimburseModal()" class="w-full sm:w-auto bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white px-6 py-3 rounded-xl transition shadow-lg hover:shadow-xl flex items-center justify-center gap-2 font-medium">
+            <i class="fa-solid fa-plus"></i>
+            <span>Ajukan Reimburse</span>
+          </button>
+        </div>
+        
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
+          <div class="overflow-x-auto">
+            <table class="w-full">
+              <thead class="bg-gray-50 dark:bg-gray-700/50 border-b border-gray-200 dark:border-gray-700">
+                <tr>
+                  <th class="p-4 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Tanggal</th>
+                  <th class="p-4 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Kategori</th>
+                  <th class="p-4 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Keterangan</th>
+                  <th class="p-4 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Jumlah</th>
+                  <th class="p-4 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Status</th>
+                  <th class="p-4 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Aksi</th>
+                </tr>
+              </thead>
+              <tbody id="table-reimburse" class="divide-y divide-gray-200 dark:divide-gray-700"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Letter Modal -->
+    <div id="modal-letter" class="fixed inset-0 bg-black/60 hidden items-center justify-center z-50 p-4 backdrop-blur-sm">
+      <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-lg scale-in overflow-hidden">
+        <div class="flex justify-between items-center p-6 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-gray-800 dark:to-gray-800">
+          <h3 class="text-xl font-bold text-gray-900 dark:text-white" id="letter-modal-title">Tambah Data</h3>
+          <button onclick="closeLetterModal()" class="w-8 h-8 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 flex items-center justify-center transition">
+            <i class="fa-solid fa-times text-gray-500"></i>
+          </button>
+        </div>
+        <form id="form-letter" onsubmit="handleLetterSubmit(event)" class="p-6 space-y-4">
+          <input type="hidden" id="l-id" /><input type="hidden" id="l-jenis" />
+          
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Nomor Surat <span class="text-red-500">*</span></label>
+              <input type="text" id="l-nomor" required class="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition" />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Tanggal <span class="text-red-500">*</span></label>
+              <input type="date" id="l-tanggal" required class="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition" />
+            </div>
+          </div>
+          
+          <div>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Perihal <span class="text-red-500">*</span></label>
+            <input type="text" id="l-perihal" required class="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition" />
+          </div>
+          
+          <div>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" id="l-label-pihak">Pengirim / Tujuan <span class="text-red-500">*</span></label>
+            <input type="text" id="l-pihak" required class="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition" />
+          </div>
+          
+          <div>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Status <span class="text-red-500">*</span></label>
+            <select id="l-status" class="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition">
+              <option value="Diterima">Diterima / Draft</option>
+              <option value="Didisposisikan">Didisposisikan</option>
+              <option value="Dalam Proses">Dalam Proses</option>
+              <option value="Selesai">Selesai / Terkirim</option>
+            </select>
+          </div>
+          
+          <div class="flex justify-end gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
+            <button type="button" onclick="closeLetterModal()" class="px-6 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition font-medium">Batal</button>
+            <button type="submit" class="px-6 py-2.5 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl hover:from-blue-700 hover:to-blue-800 transition font-medium shadow-lg">Simpan</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Reimburse Modal -->
+    <div id="modal-reimburse" class="fixed inset-0 bg-black/60 hidden items-center justify-center z-50 p-4 backdrop-blur-sm">
+      <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-lg scale-in overflow-hidden">
+        <div class="flex justify-between items-center p-6 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-gray-800 dark:to-gray-800">
+          <h3 class="text-xl font-bold text-gray-900 dark:text-white" id="reimburse-modal-title">Ajukan Reimburse</h3>
+          <button onclick="closeReimburseModal()" class="w-8 h-8 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 flex items-center justify-center transition">
+            <i class="fa-solid fa-times text-gray-500"></i>
+          </button>
+        </div>
+        <form id="form-reimburse" onsubmit="handleReimburseSubmit(event)" class="p-6 space-y-4">
+          <input type="hidden" id="r-id" />
+          
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Tanggal <span class="text-red-500">*</span></label>
+              <input type="date" id="r-tanggal" required class="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none transition" />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Kategori <span class="text-red-500">*</span></label>
+              <select id="r-kategori" required class="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none transition">
+                <option value="Transport">Transportasi</option>
+                <option value="Makan">Makan/Minum</option>
+                <option value="Akomodasi">Akomodasi</option>
+                <option value="Operasional">Operasional</option>
+                <option value="Lainnya">Lainnya</option>
+              </select>
+            </div>
+          </div>
+          
+          <div>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Keterangan <span class="text-red-500">*</span></label>
+            <input type="text" id="r-keterangan" required class="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none transition" />
+          </div>
+          
+          <div>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Jumlah (Rp) <span class="text-red-500">*</span></label>
+            <input type="number" id="r-jumlah" required class="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none transition" />
+          </div>
+          
+          <div>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Status Approval <span class="text-red-500">*</span></label>
+            <select id="r-status" class="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none transition">
+              <option value="Draft">Draft / Menunggu</option>
+              <option value="Disetujui">Disetujui</option>
+              <option value="Ditolak">Ditolak</option>
+              <option value="Dibayar">Sudah Dibayar</option>
+            </select>
+          </div>
+          
+          <div class="flex justify-end gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
+            <button type="button" onclick="closeReimburseModal()" class="px-6 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition font-medium">Batal</button>
+            <button type="submit" class="px-6 py-2.5 bg-gradient-to-r from-emerald-600 to-emerald-700 text-white rounded-xl hover:from-emerald-700 hover:to-emerald-800 transition font-medium shadow-lg">Simpan</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <script>
+      const STORAGE_KEY = "admin_kantor_demo_v2";
+      let data = { masuk: [], keluar: [], reimburse: [], logs: [] };
+      
+      const fmtRupiah = (n) => new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", minimumFractionDigits: 0 }).format(n);
+      
+      const setCurrentDate = () => {
+        const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+        document.getElementById('current-date').textContent = new Date().toLocaleDateString('id-ID', options);
+      };
+
+      function loadData() {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (saved) data = JSON.parse(saved);
+        else seedDummyData();
+        renderAll();
+      }
+      
+      function saveData() {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+      }
+
+      function seedDummyData() {
+        const today = new Date();
+        const fmt = (d) => d.toISOString().split("T")[0];
+        const add = (d, n) => { const r = new Date(d); r.setDate(r.getDate() + n); return r; };
+
+        data.masuk = [
+          { id: 1, nomor: "SM/001/X/2024", tanggal: fmt(today), perihal: "Undangan Rapat Koordinasi", pihak: "Dinas Pendidikan", status: "Diterima" },
+          { id: 2, nomor: "SM/002/X/2024", tanggal: fmt(add(today, -2)), perihal: "Penawaran Jasa IT", pihak: "PT Solusi Digital", status: "Didisposisikan" },
+          { id: 3, nomor: "SM/003/X/2024", tanggal: fmt(add(today, -5)), perihal: "Laporan Keuangan Q3", pihak: "Internal Keuangan", status: "Dalam Proses" },
+        ];
+        data.keluar = [
+          { id: 101, nomor: "SK/045/X/2024", tanggal: fmt(today), perihal: "Pengesahan Anggaran", pihak: "Direktur Utama", status: "Draft" },
+          { id: 102, nomor: "SK/044/X/2024", tanggal: fmt(add(today, -1)), perihal: "Balasan Kerjasama", pihak: "PT Maju Jaya", status: "Terkirim" },
+        ];
+        data.reimburse = [
+          { id: 501, tanggal: fmt(add(today, -1)), kategori: "Transport", keterangan: "Ojek online ke kantor cabang", jumlah: 45000, status: "Draft" },
+          { id: 502, tanggal: fmt(add(today, -3)), kategori: "Makan", keterangan: "Konsumsi rapat klien", jumlah: 250000, status: "Disetujui" },
+          { id: 503, tanggal: fmt(add(today, -7)), kategori: "Akomodasi", keterangan: "Hotel dinas luar kota", jumlah: 850000, status: "Dibayar" },
+        ];
+        data.logs = [`${new Date().toLocaleTimeString('id-ID')} - Admin tambah surat SM/001`, `${new Date().toLocaleTimeString('id-ID')} - Staff ajukan reimburse transport`];
+        saveData();
+      }
+
+      function toggleMobileSidebar() {
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('sidebar-overlay');
+        sidebar.classList.toggle('open');
+        overlay.classList.toggle('hidden');
+      }
+
+      function toggleDarkMode() {
+        if (document.documentElement.classList.contains('dark')) {
+          document.documentElement.classList.remove('dark');
+          localStorage.theme = 'light';
+        } else {
+          document.documentElement.classList.add('dark');
+          localStorage.theme = 'dark';
+        }
+      }
+
+      // Check for saved theme preference or prefer-color-scheme
+      if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        document.documentElement.classList.add('dark');
+      }
+
+      function showPage(page) {
+        document.querySelectorAll(".page-section").forEach((el) => el.classList.add("hidden"));
+        document.getElementById(`page-${page}`).classList.remove("hidden");
+        
+        document.querySelectorAll(".sidebar-link").forEach((b) => b.classList.remove("active", "bg-gray-100", "dark:bg-gray-700"));
+        document.getElementById(`btn-${page}`).classList.add("active", "bg-gray-100", "dark:bg-gray-700");
+        
+        document.getElementById("page-title").innerText = { 
+          dashboard: "Dashboard Overview", 
+          masuk: "Surat Masuk", 
+          keluar: "Surat Keluar", 
+          reimburse: "Reimbursement" 
+        }[page];
+        
+        if (page === "dashboard") renderDashboard();
+        if (page === "masuk") renderTable("masuk");
+        if (page === "keluar") renderTable("keluar");
+        if (page === "reimburse") renderReimburseTable();
+        
+        // Close mobile sidebar if open
+        if (window.innerWidth < 1024) {
+          document.getElementById('sidebar').classList.remove('open');
+          document.getElementById('sidebar-overlay').classList.add('hidden');
+        }
+      }
+
+      function renderAll() {
+        renderDashboard();
+        renderTable("masuk");
+        renderTable("keluar");
+        renderReimburseTable();
+      }
+
+      function renderDashboard() {
+        document.getElementById("stat-masuk").innerText = data.masuk.length;
+        document.getElementById("stat-keluar").innerText = data.keluar.length;
+        document.getElementById("badge-masuk").innerText = data.masuk.length;
+        document.getElementById("badge-keluar").innerText = data.keluar.length;
+        
+        const pendingR = data.reimburse.filter((r) => r.status === "Draft" || r.status === "Menunggu").length;
+        document.getElementById("stat-reimburse-pending").innerText = pendingR;
+        document.getElementById("badge-reimburse").innerText = pendingR;
+        
+        const totalR = data.reimburse.reduce((sum, r) => sum + (r.status === "Dibayar" || r.status === "Disetujui" ? r.jumlah : 0), 0);
+        document.getElementById("stat-reimburse-nominal").innerText = fmtRupiah(totalR);
+
+        const logItems = (logs, type) => logs.slice(-5).reverse().map((l) => {
+          const icon = type === 'surat' ? 'fa-envelope' : 'fa-wallet';
+          const color = type === 'surat' ? 'text-blue-500' : 'text-emerald-500';
+          return `<li class="flex items-start gap-3 p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 transition">
+            <div class="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center flex-shrink-0">
+              <i class="fa-solid ${icon} ${color} text-xs"></i>
+            </div>
+            <span class="text-gray-700 dark:text-gray-300 text-sm">${l}</span>
+          </li>`;
+        }).join("");
+        
+        document.getElementById("recent-logs-surat").innerHTML = logItems(data.logs.slice(-4), 'surat') || '<li class="text-gray-400 italic text-center py-4">Belum ada aktivitas</li>';
+        document.getElementById("recent-logs-reimburse").innerHTML = logItems(data.logs.slice(-4), 'reimburse') || '<li class="text-gray-400 italic text-center py-4">Belum ada aktivitas</li>';
+      }
+
+      const badgeConfig = {
+        Diterima: { class: "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300", icon: "fa-inbox" },
+        Draft: { class: "bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300", icon: "fa-file" },
+        Didisposisikan: { class: "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-300", icon: "fa-share" },
+        "Dalam Proses": { class: "bg-orange-100 text-orange-700 dark:bg-orange-900/40 dark:text-orange-300", icon: "fa-clock" },
+        Selesai: { class: "bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300", icon: "fa-check" },
+        Disetujui: { class: "bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300", icon: "fa-thumbs-up" },
+        Terkirim: { class: "bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300", icon: "fa-paper-plane" },
+        Menunggu: { class: "bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300", icon: "fa-clock" },
+        Ditolak: { class: "bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300", icon: "fa-times" },
+        Dibayar: { class: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300", icon: "fa-money-bill" },
+      };
+
+      function renderTable(type) {
+        const search = document.getElementById(`search-${type}`).value.toLowerCase();
+        const filtered = data[type].filter((s) => s.nomor.toLowerCase().includes(search) || s.perihal.toLowerCase().includes(search));
+        
+        document.getElementById(`table-${type}`).innerHTML = filtered.length === 0 
+          ? `<tr><td colspan="6" class="p-8 text-center text-gray-500 dark:text-gray-400"><i class="fa-solid fa-inbox text-4xl mb-2 opacity-50"></i><p>Tidak ada data</p></td></tr>`
+          : filtered.map((s) => {
+              const config = badgeConfig[s.status] || badgeConfig.Draft;
+              return `
+                <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/30 transition group">
+                  <td class="p-4 font-mono text-sm font-medium text-gray-900 dark:text-white">${s.nomor}</td>
+                  <td class="p-4 text-sm text-gray-600 dark:text-gray-400">${s.tanggal}</td>
+                  <td class="p-4 font-medium text-gray-900 dark:text-white">${s.perihal}</td>
+                  <td class="p-4 text-sm text-gray-600 dark:text-gray-400">${s.pihak}</td>
+                  <td class="p-4"><span class="status-badge ${config.class}"><i class="fa-solid ${config.icon}"></i> ${s.status}</span></td>
+                  <td class="p-4 text-center">
+                    <button onclick="openLetterModal('${type}', ${s.id})" class="w-8 h-8 rounded-lg text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/30 flex items-center justify-center transition mx-1" title="Edit">
+                      <i class="fa-solid fa-pen"></i>
+                    </button>
+                    <button onclick="deleteItem('${type}', ${s.id})" class="w-8 h-8 rounded-lg text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30 flex items-center justify-center transition mx-1" title="Hapus">
+                      <i class="fa-solid fa-trash"></i>
+                    </button>
+                  </td>
+                </tr>`;
+            }).join("");
+      }
+
+      function renderReimburseTable() {
+        const search = document.getElementById("search-reimburse").value.toLowerCase();
+        const filtered = data.reimburse.filter((r) => r.kategori.toLowerCase().includes(search) || r.keterangan.toLowerCase().includes(search));
+        
+        document.getElementById("table-reimburse").innerHTML = filtered.length === 0
+          ? `<tr><td colspan="6" class="p-8 text-center text-gray-500 dark:text-gray-400"><i class="fa-solid fa-inbox text-4xl mb-2 opacity-50"></i><p>Tidak ada data</p></td></tr>`
+          : filtered.map((r) => {
+              const config = badgeConfig[r.status] || badgeConfig.Draft;
+              return `
+                <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/30 transition">
+                  <td class="p-4 text-sm text-gray-600 dark:text-gray-400">${r.tanggal}</td>
+                  <td class="p-4"><span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300">${r.kategori}</span></td>
+                  <td class="p-4 text-gray-900 dark:text-white">${r.keterangan}</td>
+                  <td class="p-4 font-bold text-emerald-600 dark:text-emerald-400">${fmtRupiah(r.jumlah)}</td>
+                  <td class="p-4"><span class="status-badge ${config.class}"><i class="fa-solid ${config.icon}"></i> ${r.status}</span></td>
+                  <td class="p-4 text-center">
+                    <button onclick="openReimburseModal(${r.id})" class="w-8 h-8 rounded-lg text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/30 flex items-center justify-center transition mx-1" title="Edit">
+                      <i class="fa-solid fa-pen"></i>
+                    </button>
+                    <button onclick="deleteReimburse(${r.id})" class="w-8 h-8 rounded-lg text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30 flex items-center justify-center transition mx-1" title="Hapus">
+                      <i class="fa-solid fa-trash"></i>
+                    </button>
+                  </td>
+                </tr>`;
+            }).join("");
+      }
+
+      // Letter Modal
+      function openLetterModal(type, id = null) {
+        document.getElementById("modal-letter").classList.remove("hidden");
+        document.getElementById("modal-letter").classList.add("flex");
+        document.getElementById("l-jenis").value = type;
+        document.getElementById("l-label-pihak").innerText = type === "masuk" ? "Pengirim" : "Tujuan";
+        document.getElementById("letter-modal-title").innerText = id ? `Edit Surat ${type === "masuk" ? "Masuk" : "Keluar"}` : `Tambah Surat ${type === "masuk" ? "Masuk" : "Keluar"}`;
+        document.getElementById("form-letter").reset();
+        document.getElementById("l-id").value = id || "";
+        document.getElementById("l-tanggal").value = new Date().toISOString().split('T')[0];
+        
+        if (id) {
+          const i = data[type].find((s) => s.id === id);
+          document.getElementById("l-nomor").value = i.nomor;
+          document.getElementById("l-tanggal").value = i.tanggal;
+          document.getElementById("l-perihal").value = i.perihal;
+          document.getElementById("l-pihak").value = i.pihak;
+          document.getElementById("l-status").value = i.status;
+        }
+      }
+      
+      function closeLetterModal() {
+        document.getElementById("modal-letter").classList.add("hidden");
+        document.getElementById("modal-letter").classList.remove("flex");
+      }
+      
+      function handleLetterSubmit(e) {
+        e.preventDefault();
+        const type = document.getElementById("l-jenis").value;
+        const id = document.getElementById("l-id").value;
+        const p = {
+          id: id ? parseInt(id) : Date.now(),
+          nomor: document.getElementById("l-nomor").value,
+          tanggal: document.getElementById("l-tanggal").value,
+          perihal: document.getElementById("l-perihal").value,
+          pihak: document.getElementById("l-pihak").value,
+          status: document.getElementById("l-status").value,
+        };
+        if (id) {
+          const idx = data[type].findIndex((s) => s.id == id);
+          data[type][idx] = p;
+          data.logs.push(`${new Date().toLocaleTimeString('id-ID')} - Edit surat ${type} ${p.nomor}`);
+        } else {
+          data[type].push(p);
+          data.logs.push(`${new Date().toLocaleTimeString('id-ID')} - Tambah surat ${type} ${p.nomor}`);
+        }
+        saveData();
+        closeLetterModal();
+        renderTable(type);
+        renderDashboard();
+      }
+
+      // Reimburse Modal
+      function openReimburseModal(id = null) {
+        document.getElementById("modal-reimburse").classList.remove("hidden");
+        document.getElementById("modal-reimburse").classList.add("flex");
+        document.getElementById("reimburse-modal-title").innerText = id ? "Edit Reimburse" : "Ajukan Reimburse";
+        document.getElementById("form-reimburse").reset();
+        document.getElementById("r-id").value = id || "";
+        document.getElementById("r-tanggal").value = new Date().toISOString().split('T')[0];
+        
+        if (id) {
+          const r = data.reimburse.find((i) => i.id === id);
+          document.getElementById("r-tanggal").value = r.tanggal;
+          document.getElementById("r-kategori").value = r.kategori;
+          document.getElementById("r-keterangan").value = r.keterangan;
+          document.getElementById("r-jumlah").value = r.jumlah;
+          document.getElementById("r-status").value = r.status;
+        }
+      }
+      
+      function closeReimburseModal() {
+        document.getElementById("modal-reimburse").classList.add("hidden");
+        document.getElementById("modal-reimburse").classList.remove("flex");
+      }
+      
+      function handleReimburseSubmit(e) {
+        e.preventDefault();
+        const id = document.getElementById("r-id").value;
+        const p = {
+          id: id ? parseInt(id) : Date.now(),
+          tanggal: document.getElementById("r-tanggal").value,
+          kategori: document.getElementById("r-kategori").value,
+          keterangan: document.getElementById("r-keterangan").value,
+          jumlah: parseInt(document.getElementById("r-jumlah").value),
+          status: document.getElementById("r-status").value,
+        };
+        if (id) {
+          const idx = data.reimburse.findIndex((i) => i.id == id);
+          data.reimburse[idx] = p;
+          data.logs.push(`${new Date().toLocaleTimeString('id-ID')} - Edit reimburse ${p.keterangan}`);
+        } else {
+          data.reimburse.push(p);
+          data.logs.push(`${new Date().toLocaleTimeString('id-ID')} - Ajukan reimburse ${p.kategori} ${fmtRupiah(p.jumlah)}`);
+        }
+        saveData();
+        closeReimburseModal();
+        renderReimburseTable();
+        renderDashboard();
+      }
+      
+      function deleteReimburse(id) {
+        if (confirm("Yakin ingin menghapus data reimburse ini?")) {
+          data.reimburse = data.reimburse.filter((i) => i.id !== id);
+          data.logs.push(`${new Date().toLocaleTimeString('id-ID')} - Hapus reimburse`);
+          saveData();
+          renderReimburseTable();
+          renderDashboard();
+        }
+      }
+
+      function deleteItem(type, id) {
+        if (confirm("Yakin ingin menghapus data ini?")) {
+          const i = data[type].find((s) => s.id === id);
+          data[type] = data[type].filter((s) => s.id !== id);
+          data.logs.push(`${new Date().toLocaleTimeString('id-ID')} - Hapus ${type} ${i.nomor || i.keterangan}`);
+          saveData();
+          renderTable(type);
+          renderDashboard();
+        }
+      }
+      
+      function resetData() {
+        if (confirm("Reset semua data ke data demo awal?")) {
+          localStorage.removeItem(STORAGE_KEY);
+          seedDummyData();
+          renderAll();
+        }
+      }
+      
+      // Search listeners
+      document.getElementById("search-masuk").addEventListener("input", () => renderTable("masuk"));
+      document.getElementById("search-keluar").addEventListener("input", () => renderTable("keluar"));
+      document.getElementById("search-reimburse").addEventListener("input", () => renderReimburseTable());
+
+      // Initialize
+      window.addEventListener("DOMContentLoaded", () => {
+        setCurrentDate();
+        showPage("dashboard");
+        loadData();
+      });
+      
+      // Close modals on outside click
+      window.onclick = function(event) {
+        if (event.target.id === 'modal-letter') closeLetterModal();
+        if (event.target.id === 'modal-reimburse') closeReimburseModal();
+      }
+    </script>
+  </body>
+</html>
