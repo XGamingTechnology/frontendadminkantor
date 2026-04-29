@@ -6,7 +6,7 @@ interface ProtectedRouteProps {
   isAuthenticated?: boolean;
 }
 
-const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, isAuthenticated = true }) => {
+export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, isAuthenticated = true }) => {
   // For demo purposes, we're always authenticated
   // In a real app, you would check authentication status here
   if (!isAuthenticated) {
@@ -15,5 +15,3 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, isAuthenticat
 
   return <>{children}</>;
 };
-
-export default ProtectedRoute;

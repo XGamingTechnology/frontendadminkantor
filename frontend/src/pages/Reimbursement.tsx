@@ -1,19 +1,19 @@
 import React, { useState } from 'react';
-import { Reimbursement } from '../types';
+import type { Reimbursement as ReimbursementType } from '../types';
 import { fmtRupiah, getStatusColor } from '../utils/helpers';
 import { Button, Badge } from '../components/ui';
 
 interface ReimbursementProps {
-  data: Reimbursement[];
-  onAdd: (reimbursement: Reimbursement) => void;
-  onUpdate: (reimbursement: Reimbursement) => void;
+  data: ReimbursementType[];
+  onAdd: (reimbursement: ReimbursementType) => void;
+  onUpdate: (reimbursement: ReimbursementType) => void;
   onDelete: (id: number) => void;
 }
 
 const Reimbursement: React.FC<ReimbursementProps> = ({ data, onAdd, onUpdate, onDelete }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingItem, setEditingItem] = useState<Reimbursement | null>(null);
+  const [editingItem, setEditingItem] = useState<ReimbursementType | null>(null);
   const [formData, setFormData] = useState({
     tanggal: new Date().toISOString().split('T')[0],
     kategori: 'Transport',
@@ -28,7 +28,7 @@ const Reimbursement: React.FC<ReimbursementProps> = ({ data, onAdd, onUpdate, on
       r.keterangan.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const openModal = (item?: Reimbursement) => {
+  const openModal = (item?: ReimbursementType) => {
     if (item) {
       setEditingItem(item);
       setFormData({
@@ -58,7 +58,7 @@ const Reimbursement: React.FC<ReimbursementProps> = ({ data, onAdd, onUpdate, on
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const reimbursement: Reimbursement = {
+    const reimbursement: ReimbursementType = {
       id: editingItem?.id || Date.now(),
       ...formData,
     };
